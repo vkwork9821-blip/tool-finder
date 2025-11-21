@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>Адмін | TOOL Finder</title>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<button id="logoutBtn" style="margin-bottom: 20px;">Вийти</button>
+<script>
+  if (!sessionStorage.getItem('userRole')) {
+    window.location.href = "/login.html";
+  }
+</script>
+
+
+
+<style>
+  body { background: #000; color: #fff; font-family: Arial; padding: 20px; }
+  h1 { color: #3cb371; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { border: 1px solid #444; padding: 10px; text-align: center; }
+  input, button { margin: 5px; padding: 8px; border-radius: 4px; border: none; }
+  button { background: #2e8b57; color: #fff; cursor: pointer; }
+</style>
+</head>
+<body>
+  
+  <script>
+    const role = localStorage.getItem('userRole');
+    if (role !== 'admin') {
+      window.location.href = '/login.html';
+    }
+  </script>
+  
+  <h1>Адмінпанель TOOL Finder</h1>
+  <h3>👤 Користувач: <span id="adminName"></span></h3>
+
+  <div>
+    <input id="login" placeholder="Логін">
+    <input id="password" placeholder="Пароль">
+    <input id="name" placeholder="Ім’я">
+    <input id="role" placeholder="Роль (admin/user)">
+    <button onclick="addUser()">Додати користувача</button>
+  </div>
+
+  <h2>Список користувачів</h2>
+  <table id="usersTable">
+    <thead>
+      <tr><th>Ім’я</th><th>Логін</th><th>Роль</th><th>Дія</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const SUPABASE_URL = "https://sjbumtryycrhtbldeqcm.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqYnVtdHJ5eWNyaHRibGRlcWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1ODc5MzAsImV4cCI6MjA3OTE2MzkzMH0.lL9o0r7Eov9iUQPONXq7oGGURn9xJGsg48vKETJVP9c";
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const adminName = localStorage.getItem("name");
+    document.getElementById("adminName").textContent = adminName;
+
+    async function loadUsers() {
+      const { data } = await supabase.from("users").select("*");
+      const tbody = document.querySelector("#usersTable tbody");
+      tbody.innerHTML = "";
+      data.forEach(u => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${u.name}</td><td>${u.login}</td><td>${u.role}</td><td><button onclick="deleteUser(${u.id})">❌</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function addUser() {
+      const login = document.getElementById("login").value;
+      const password = document.getElementById("password").value;
+      const name = document.getElementById("name").value;
+      const role = document.getElementById("role").value;
+
+      await supabase.from("users").insert([{ login, password, name, role }]);
+      loadUsers();
+    }
+
+    async function deleteUser(id) {
+      await supabase.from("users").delete().eq("id", id);
+      loadUsers();
+    }
+
+    loadUsers();
+  </script>
+
+
+<script>
+  document.getElementById("logoutBtn").addEventListener("click", function () {
+    sessionStorage.clear();
+    window.location.href = "/login.html";
+  });
+</script>
+
+<script>
+ 
+ ///sessionStorage.setItem('userRole', data.role);
+</script>
+
+</body>
+</html>

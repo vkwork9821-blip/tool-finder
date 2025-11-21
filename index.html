@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>TOOL Finder</title>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<button id="logoutBtn" style="margin-bottom: 20px;">Вийти</button>
+
+<script>
+  if (!sessionStorage.getItem('userRole')) {
+    window.location.href = "/login.html";
+  }
+</script>
+
+
+
+
+<style>
+  body {
+    background-color: #000;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+  }
+
+  h1 {
+    color: #3cb371;
+    text-align: center;
+  }
+
+  .filters {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  input {
+    padding: 8px 10px;
+    border: none;
+    border-radius: 4px;
+    width: 200px;
+    font-size: 16px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    padding: 10px;
+    border: 1px solid #444;
+    text-align: center;
+  }
+
+  th {
+    background-color: #2e8b57;
+  }
+</style>
+</head>
+<body>
+
+  <script>
+    const role = localStorage.getItem('userRole');
+    if (!role) {
+      window.location.href = '/login.html';
+    }
+  </script>
+
+<h1>TOOL Finder</h1>
+
+<div class="filters">
+  <input type="text" id="filterCell" placeholder="🔍 Пошук за Коміркою...">
+  <input type="text" id="filterConnector" placeholder="🔍 Пошук за Роз’ємом...">
+</div>
+
+<table id="toolTable">
+  <thead>
+    <tr>
+      <th>Комірка</th>
+      <th>Роз’єм</th>
+      <th>Тул</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Рядки генеруються автоматично -->
+  </tbody>
+</table>
+
+<script>
+  // 🔧 Встав сюди свої дані з Supabase (Settings → API)
+  const SUPABASE_URL = "https://sjbumtryycrhtbldeqcm.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqYnVtdHJ5eWNyaHRibGRlcWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1ODc5MzAsImV4cCI6MjA3OTE2MzkzMH0.lL9o0r7Eov9iUQPONXq7oGGURn9xJGsg48vKETJVP9c";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const tableBody = document.querySelector("#toolTable tbody");
+  const filterCell = document.getElementById("filterCell");
+  const filterConnector = document.getElementById("filterConnector");
+
+  // 🚀 Завантаження даних з Supabase
+  async function loadData() {
+    const { data, error } = await supabase
+      .from("tools") // Назва таблиці у Supabase
+      .select("*");
+
+    if (error) {
+      console.error("Помилка завантаження:", error);
+      tableBody.innerHTML = `<tr><td colspan="3" style="color:red;">Помилка завантаження даних</td></tr>`;
+      return;
+    }
+
+    renderTable(data);
+  }
+
+  // 🧩 Відображення таблиці
+  function renderTable(data) {
+    tableBody.innerHTML = "";
+    data.forEach(row => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${row.cell}</td>
+        <td>${row.connector}</td>
+        <td>${row.tool}</td>
+      `;
+      tableBody.appendChild(tr);
+    });
+
+    applyFilters(); // застосовує фільтри одразу після рендеру
+  }
+
+  // 🔍 Фільтрація
+  function applyFilters() {
+    const cellValue = filterCell.value.toLowerCase();
+    const connectorValue = filterConnector.value.toLowerCase();
+
+    const rows = tableBody.querySelectorAll("tr");
+    rows.forEach(row => {
+      const cellText = row.cells[0].textContent.toLowerCase();
+      const connectorText = row.cells[1].textContent.toLowerCase();
+      const matchCell = cellText.includes(cellValue);
+      const matchConnector = connectorText.includes(connectorValue);
+
+      row.style.display = (matchCell && matchConnector) ? "" : "none";
+    });
+  }
+
+  filterCell.addEventListener("input", applyFilters);
+  filterConnector.addEventListener("input", applyFilters);
+
+  loadData();
+
+
+
+
+
+</script>
+
+
+<script>
+  document.getElementById("logoutBtn").addEventListener("click", function () {
+    sessionStorage.clear();
+    window.location.href = "/login.html";
+  });
+</script>
+
+<script>
+ 
+ //sessionStorage.setItem('userRole', data.role);
+ </script>
+
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Вхід — TOOL Finder</title>
+  <style>
+    body {
+      background-color: #0b0b0b;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+    input {
+      margin: 8px;
+      padding: 10px;
+      width: 200px;
+      border-radius: 4px;
+      border: 1px solid #3a3a3a;
+      background-color: #111;
+      color: white;
+    }
+    button {
+      background-color: #1db954;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #17a84b;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🔧 TOOL Finder — Вхід</h2>
+  <input id="login" type="text" placeholder="Логін">
+  <input id="password" type="password" placeholder="Пароль">
+  <button id="loginBtn">Увійти</button>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+  
+    const supabaseUrl = "https://sjbumtryycrhtbldeqcm.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqYnVtdHJ5eWNyaHRibGRlcWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1ODc5MzAsImV4cCI6MjA3OTE2MzkzMH0.lL9o0r7Eov9iUQPONXq7oGGURn9xJGsg48vKETJVP9c";
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    // const role = localStorage.getItem('userRole');-------------------------------------------
+    async function loginUser() {
+      const login = document.getElementById('login').value.trim();
+      const password = document.getElementById('password').value.trim();
+  
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('login', login)
+        .eq('password', password)
+        .single();
+  
+      console.log("Response:", data, error);
+  
+      if (data) {
+        // ⛔ Було localStorage → ✅ стало sessionStorage (обов'язкова зміна)
+        sessionStorage.setItem('userRole', data.role);
+        sessionStorage.setItem('userName', data.name);
+  
+        if (data.role === 'admin') {
+          window.location.href = '/admin.html';
+        } else {
+          window.location.href = '/index.html';
+        }
+      } else {
+        alert('❌ Невірний логін або пароль');
+      }
+    }
+
+    // Прив’язуємо кнопку
+    document.getElementById('loginBtn').addEventListener('click', loginUser);
+  </script>
+
+</body>
+</html>
+
+
+
+
